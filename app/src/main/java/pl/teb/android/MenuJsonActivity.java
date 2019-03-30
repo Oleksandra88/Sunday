@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -15,6 +16,10 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class MenuJsonActivity extends AppCompatActivity {
     private static final String TAG = "MenuActivity";
@@ -29,6 +34,7 @@ public class MenuJsonActivity extends AppCompatActivity {
 
     protected void getMenu(final Context context) {
         final TextView textView = (TextView) findViewById(R.id.aaa);
+        final ListView listView = (ListView) findViewById(R.id.menu);
         showSimpleProgressDialog(context, "Loading...", "Fetching Json", false);
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "http://192.168.1.194:5544";
@@ -38,8 +44,11 @@ public class MenuJsonActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONArray response) {
                         Log.v(TAG, "onResponse");
-                        textView.setText("Response is: " + response.toString().substring(0, 500));
                         removeSimpleProgressDialog();
+
+                        ArrayList<MenuModel> menuModelArrayList = getInfo(response);
+                        MenuAdapter menuAdapter = new MenuAdapter(context, menuModelArrayList);
+                        listView.setAdapter(menuAdapter);
                     }
                 },
                 new Response.ErrorListener() {
@@ -54,6 +63,26 @@ public class MenuJsonActivity extends AppCompatActivity {
         );
 
         queue.add(jsonArrayRequest);
+    }
+
+    protected ArrayList<MenuModel> getInfo (JSONArray response) {
+        ArrayList<MenuModel> menuModelArrayList = new ArrayList<MenuModel> ();
+
+        try {
+                       for (int i = 0; i < response.length(); i++) {
+                MenuModel playersModel = new MenuModel();
+                JSONObject dataobj = response.getJSONObject(i);
+                playersModel.setName(dataobj.getString("name"));
+                playersModel.setDescription(dataobj.getString("description"));
+                playersModel.setPrice(dataobj.getDouble("price"));
+                menuModelArrayList.add(playersModel);
+
+                       }
+                   } catch (JSONException e) {
+                       e.printStackTrace();
+        }
+
+        return menuModelArrayList;
     }
 
     public static void showSimpleProgressDialog(Context context, String title,
