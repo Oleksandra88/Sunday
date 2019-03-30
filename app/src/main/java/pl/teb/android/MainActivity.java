@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showAdultMenu (View view) {
-        Intent intent = new Intent(this, MenuActivity.class);
+        Intent intent = new Intent(this, MenuJsonActivity.class);
         startActivity(intent);
     }
 
